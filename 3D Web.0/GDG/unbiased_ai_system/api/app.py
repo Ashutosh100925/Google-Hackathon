@@ -4,6 +4,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from api.response_schema import AnalyzeRequest, WhatIfRequest, InferenceResponse
 from pipelines.inference_pipeline import run_inference, run_whatif
@@ -18,6 +19,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/", include_in_schema=False)
+def root_redirect():
+    return RedirectResponse(url="/3D%20Web.0/GDG/index.html", status_code=307)
 
 @app.get("/health")
 def health_check():
