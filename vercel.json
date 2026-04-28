@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
-    "api/index.py": {
-      "excludeFiles": "{3D Web.0/**,**/__pycache__/**,**/*.pyc,**/*.mp4,**/*.png,**/*.jpg,**/*.jpeg,**/*.webp,**/*.gif}"
+    "api/**/*.py": {
+      "excludeFiles": "{**/__pycache__/**,**/*.pyc,**/*.mp4,**/*.png,**/*.jpg,**/*.jpeg,**/*.webp,**/*.gif}"
     }
   },
   "routes": [
