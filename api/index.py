@@ -5,8 +5,8 @@ import sys
 
 def _load_backend_app():
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    backend_dir = os.path.join(repo_root, "3D Web.0", "GDG", "backend")
-    shared_dir = os.path.join(repo_root, "3D Web.0", "GDG")
+    backend_dir = os.path.join(repo_root, "backend")
+    shared_dir = repo_root
 
     # Allow `from routers import ...` and importing `unbiased_ai_system`
     sys.path.insert(0, backend_dir)

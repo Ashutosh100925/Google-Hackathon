@@ -22,7 +22,7 @@ app.add_middleware(
 
 @app.get("/", include_in_schema=False)
 def root_redirect():
-    return RedirectResponse(url="/3D%20Web.0/GDG/index.html", status_code=307)
+    return RedirectResponse(url="/", status_code=307)
 
 @app.get("/health")
 def health_check():

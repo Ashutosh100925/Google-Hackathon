@@ -961,29 +961,43 @@ async function runRealAnalysis() {
 
     try {
         const type = detection.type;
-        const signals = await callGemmaAPI(textData, type);
-        console.log("Signals:", signals);
-
-        const { score, baseScore, breakdown, decision } = calculateScore(signals, type, textData);
-        console.log("Score Breakdown:", breakdown);
-        console.log("Final Score:", score);
-        console.log("Decision:", decision);
-
-        const fairnessData = calculateFairness(textData);
-        const confidence = calculateConfidence(textData, signals);
         
+        // --- STEP 3: REAL API CALL ---
+        const response = await fetch('/api/analyze/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model_type: type,
+                features: { profile_text: textData }
+            })
+        });
+
+        if (!response.ok) throw new Error(`API Error: ${response.status}`);
+        
+        const backendData = await response.json();
+        console.log("Backend Response:", backendData);
+
+        // Map backend response to frontend format
         const finalData = {
             detection,
-            signals,
-            score,
-            baseScore,
-            decision,
-            fairness: fairnessData.fairness,
-            penalties: fairnessData.penalties,
-            confidence,
-            explanation: getExplanation(signals, type, textData)
+            signals: backendData.fairness_metrics || {}, // Assuming signals are in fairness_metrics or similar
+            score: backendData.score,
+            decision: backendData.decision,
+            fairness: Math.round((1 - (backendData.bias_report?.overall_bias_score || 0)) * 100),
+            penalties: {
+                gender: Math.round((backendData.bias_report?.protected_groups_impact?.gender || 0) * 100),
+                age: Math.round((backendData.bias_report?.protected_groups_impact?.age || 0) * 100),
+                education: Math.round((backendData.bias_report?.protected_groups_impact?.education || 0) * 100)
+            },
+            confidence: Math.round(backendData.score > 50 ? backendData.score : 100 - backendData.score),
+            explanation: backendData.explanation
         };
         
+        // Ensure signals has something if empty (for UI drivers)
+        if (Object.keys(finalData.signals).length === 0) {
+            finalData.signals = await callGemmaAPI(textData, type); // Fallback to mock signals for UI bars if backend doesn't provide them yet
+        }
+
         setTimeout(() => {
             updateUI(finalData);
             btn.innerHTML = `<svg class="w-6 h-6 text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Run Analysis`;

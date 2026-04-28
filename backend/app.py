@@ -33,7 +33,7 @@ app.include_router(analyze.router)
 @app.get("/", include_in_schema=False)
 def root_redirect():
     # Fallback for deployments where requests hit the API app at "/"
-    return RedirectResponse(url="/3D%20Web.0/GDG/index.html", status_code=307)
+    return RedirectResponse(url="/", status_code=307)
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
