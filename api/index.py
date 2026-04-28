@@ -4,21 +4,24 @@ import sys
 
 
 def _load_backend_app():
-    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    backend_dir = os.path.join(repo_root, "backend")
-    shared_dir = repo_root
+    # Since we are in api/index.py, the logic is now in ./backend_src
+    api_dir = os.path.dirname(__file__)
+    backend_dir = os.path.join(api_dir, "backend_src")
+    shared_dir = os.path.join(api_dir, "ai_src")
+    repo_root = os.path.abspath(os.path.join(api_dir, ".."))
 
-    # Allow `from routers import ...` and importing `unbiased_ai_system`
+    # Allow importing from the consolidated source folders
     sys.path.insert(0, backend_dir)
     sys.path.insert(0, shared_dir)
+    sys.path.insert(0, repo_root) # For unbiased_ai_system if still referenced by name
 
-    backend_app_path = os.path.join(backend_dir, "app.py")
+    backend_app_path = os.path.join(backend_dir, "fairai_app.py")
     spec = importlib.util.spec_from_file_location("fairai_backend_app", backend_app_path)
     if spec is None or spec.loader is None:
-        raise RuntimeError("Unable to load backend FastAPI app module.")
+        raise RuntimeError(f"Unable to load backend FastAPI app module at {backend_app_path}")
 
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)  # type: ignore[attr-defined]
+    spec.loader.exec_module(module)
 
     if not hasattr(module, "app"):
         raise RuntimeError("Backend module does not expose `app`.")
