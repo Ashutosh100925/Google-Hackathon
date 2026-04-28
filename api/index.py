@@ -43,5 +43,5 @@ app.include_router(health.router)
 app.include_router(analyze.router)
 
 @app.get("/", include_in_schema=False)
-def root_redirect():
-    return RedirectResponse(url="/", status_code=307)
+def root_info():
+    return {"status": "FairAI API is running", "endpoints": ["/analyze", "/health"]}
