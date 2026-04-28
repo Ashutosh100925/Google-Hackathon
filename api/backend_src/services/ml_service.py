@@ -10,7 +10,11 @@ from services.fairness_metrics import calculate_fairness
 from services.bias_detector import generate_bias_report
 from services.explanation_engine import generate_explanation
 
-ARTIFACT_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "artifacts")
+if os.environ.get("VERCEL"):
+    ARTIFACT_DIR = "/tmp/artifacts"
+else:
+    ARTIFACT_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "artifacts")
+
 os.makedirs(ARTIFACT_DIR, exist_ok=True)
 
 _models = {}
@@ -254,7 +258,7 @@ def apply_hybrid_rules(clean_features: dict, ml_pred: int, norm_score: float):
 # MAIN EXECUTION
 # ----------------------------------------------------
 from services.decision_sensitivity import generate_sensitivity_suggestions
-from unbiased_ai_system.utils.nlp_parser import runFairAIAnalysis
+from utils.nlp_parser import runFairAIAnalysis
 
 def run_prediction(model_type: str, raw_payload: dict):
     raw_text = " ".join([str(v) for v in raw_payload.values()]) if isinstance(raw_payload, dict) else str(raw_payload or "")

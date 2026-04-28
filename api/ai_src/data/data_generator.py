@@ -3,7 +3,11 @@ import pandas as pd
 import numpy as np
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RAW_DATA_DIR = os.path.join(BASE_DIR, "data", "raw_data")
+if os.environ.get("VERCEL"):
+    RAW_DATA_DIR = "/tmp/raw_data"
+else:
+    RAW_DATA_DIR = os.path.join(BASE_DIR, "data", "raw_data")
+
 os.makedirs(RAW_DATA_DIR, exist_ok=True)
 
 def generate_hiring_data(n=1000):

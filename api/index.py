@@ -1,70 +1,31 @@
-import importlib.util
 import os
 import sys
 
+# Add necessary paths to sys.path
+# Since Vercel runs this from the api/ directory, __file__ is /var/task/api/index.py
+api_dir = os.path.dirname(__file__)
+backend_dir = os.path.join(api_dir, "backend_src")
+ai_dir = os.path.join(api_dir, "ai_src")
+repo_root = os.path.abspath(os.path.join(api_dir, ".."))
 
-def _load_backend_app():
-    # Since we are in api/index.py, the logic is now in ./backend_src
-    api_dir = os.path.dirname(__file__)
-    backend_dir = os.path.join(api_dir, "backend_src")
-    shared_dir = os.path.join(api_dir, "ai_src")
-    repo_root = os.path.abspath(os.path.join(api_dir, ".."))
+# Ensure our local modules are found first
+sys.path.insert(0, backend_dir)
+sys.path.insert(0, ai_dir)
+sys.path.insert(0, repo_root)
 
-    # Allow importing from the consolidated source folders
-    sys.path.insert(0, backend_dir)
-    sys.path.insert(0, shared_dir)
-    sys.path.insert(0, repo_root) # For unbiased_ai_system if still referenced by name
-
+# Static import for better Vercel static analysis and reliability
+try:
+    from fairai_app import app
+except ImportError as e:
+    # Fallback to dynamic load if static fails for some reason (though it shouldn't)
+    import importlib.util
     backend_app_path = os.path.join(backend_dir, "fairai_app.py")
     spec = importlib.util.spec_from_file_location("fairai_backend_app", backend_app_path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"Unable to load backend FastAPI app module at {backend_app_path}")
+    if spec and spec.loader:
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        app = getattr(module, "app")
+    else:
+        raise e
 
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-
-    if not hasattr(module, "app"):
-        raise RuntimeError("Backend module does not expose `app`.")
-    return module.app
-
-
-class ApiPrefixCompatWrapper:
-    """
-    Vercel rewrite compatibility:
-    - Some setups pass /api/... through to this function unchanged
-    - Others strip /api and pass /...
-    This wrapper supports both by stripping a leading /api before dispatch.
-    """
-
-    def __init__(self, asgi_app, prefix="/api"):
-        self.asgi_app = asgi_app
-        self.prefix = prefix
-
-    async def __call__(self, scope, receive, send):
-        if scope.get("type") in {"http", "websocket"}:
-            original_path = scope.get("path", "")
-            adjusted_path = original_path
-
-            if original_path == self.prefix:
-                adjusted_path = "/"
-            elif original_path.startswith(f"{self.prefix}/"):
-                adjusted_path = original_path[len(self.prefix):]
-
-            if adjusted_path != original_path:
-                updated_scope = dict(scope)
-                updated_scope["path"] = adjusted_path
-
-                raw_path = scope.get("raw_path")
-                if isinstance(raw_path, (bytes, bytearray)):
-                    if raw_path == self.prefix.encode():
-                        updated_scope["raw_path"] = b"/"
-                    elif raw_path.startswith(f"{self.prefix}/".encode()):
-                        updated_scope["raw_path"] = raw_path[len(self.prefix):]
-
-                scope = updated_scope
-
-        await self.asgi_app(scope, receive, send)
-
-
-app = ApiPrefixCompatWrapper(_load_backend_app())
-
+# The app variable is now exposed to Vercel

@@ -8,6 +8,11 @@ import joblib
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
+if os.environ.get("VERCEL"):
+    MODELS_DIR = "/tmp/models"
+else:
+    MODELS_DIR = os.path.join(BASE_DIR, "models")
+
 from data.data_generator import generate_hiring_data, generate_loan_data, generate_admission_data
 
 def train_hiring_model():
@@ -26,10 +31,10 @@ def train_hiring_model():
     
     print(f"Hiring Model Accuracy: {model.score(X_test, y_test):.2f}")
     
-    os.makedirs(os.path.join(BASE_DIR, "models", "hiring_model"), exist_ok=True)
-    joblib.dump(model, os.path.join(BASE_DIR, "models", "hiring_model", "model.pkl"))
+    os.makedirs(os.path.join(MODELS_DIR, "hiring_model"), exist_ok=True)
+    joblib.dump(model, os.path.join(MODELS_DIR, "hiring_model", "model.pkl"))
     # Save training columns for feature matching later
-    joblib.dump(list(X.columns), os.path.join(BASE_DIR, "models", "hiring_model", "columns.pkl"))
+    joblib.dump(list(X.columns), os.path.join(MODELS_DIR, "hiring_model", "columns.pkl"))
 
 def train_loan_model():
     print("Training Loan Model...")
@@ -44,9 +49,9 @@ def train_loan_model():
     
     print(f"Loan Model Accuracy: {model.score(X_test, y_test):.2f}")
     
-    os.makedirs(os.path.join(BASE_DIR, "models", "loan_model"), exist_ok=True)
-    joblib.dump(model, os.path.join(BASE_DIR, "models", "loan_model", "model.pkl"))
-    joblib.dump(list(X.columns), os.path.join(BASE_DIR, "models", "loan_model", "columns.pkl"))
+    os.makedirs(os.path.join(MODELS_DIR, "loan_model"), exist_ok=True)
+    joblib.dump(model, os.path.join(MODELS_DIR, "loan_model", "model.pkl"))
+    joblib.dump(list(X.columns), os.path.join(MODELS_DIR, "loan_model", "columns.pkl"))
 
 def train_admission_model():
     print("Training Admission Model...")
@@ -62,9 +67,9 @@ def train_admission_model():
     
     print(f"Admission Model Accuracy: {model.score(X_test, y_test):.2f}")
     
-    os.makedirs(os.path.join(BASE_DIR, "models", "admission_model"), exist_ok=True)
-    joblib.dump(model, os.path.join(BASE_DIR, "models", "admission_model", "model.pkl"))
-    joblib.dump(list(X.columns), os.path.join(BASE_DIR, "models", "admission_model", "columns.pkl"))
+    os.makedirs(os.path.join(MODELS_DIR, "admission_model"), exist_ok=True)
+    joblib.dump(model, os.path.join(MODELS_DIR, "admission_model", "model.pkl"))
+    joblib.dump(list(X.columns), os.path.join(MODELS_DIR, "admission_model", "columns.pkl"))
 
 if __name__ == "__main__":
     generate_hiring_data()
