@@ -5,7 +5,7 @@ router = APIRouter(
     tags=["Health"]
 )
 
-@router.get("/")
+@router.get("")
 async def health_check():
     """
     Health check endpoint to ensure the API is running correctly.

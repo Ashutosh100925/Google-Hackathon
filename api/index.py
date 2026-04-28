@@ -39,8 +39,8 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(health.router)
-app.include_router(analyze.router)
+app.include_router(health.router, prefix="/api")
+app.include_router(analyze.router, prefix="/api")
 
 @app.get("/", include_in_schema=False)
 def root_info():

@@ -13,7 +13,7 @@ class AnalysisRequestPayload(BaseModel):
     model_type: str
     features: Dict[str, Any]
 
-@router.post("/")
+@router.post("")
 async def analyze_data(request: AnalysisRequestPayload):
     """
     Base route for analysis.

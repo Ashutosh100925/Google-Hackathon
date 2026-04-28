@@ -963,7 +963,7 @@ async function runRealAnalysis() {
         const type = detection.type;
         
         // --- STEP 3: REAL API CALL ---
-        const response = await fetch('/api/analyze/', {
+        const response = await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
