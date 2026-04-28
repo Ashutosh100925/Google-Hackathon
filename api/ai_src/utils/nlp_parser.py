@@ -246,10 +246,16 @@ def _normalize_text(text: str) -> str:
     return re.sub(r"\s+", " ", (text or "").strip()).lower()
 
 
+def _normalize_domain(domain_str: str) -> str:
+    d = (domain_str or "").strip().lower().replace("_", " ")
+    if "hiring" in d: return "hiring"
+    if "loan" in d: return "loan"
+    if "admission" in d or "college" in d: return "admission"
+    return d
+
 def extractSignals(text, decisionType):
-    domain = (decisionType or "").strip().lower()
-    normalized_domain = "loan" if domain == "loan approval" else domain
-    config = DECISION_CONFIG.get(normalized_domain, DECISION_CONFIG.get(domain))
+    normalized_domain = _normalize_domain(decisionType)
+    config = DECISION_CONFIG.get(normalized_domain)
     if not config:
         return {"positive": {}, "negative": {}, "summary": {"positive_count": 0, "negative_count": 0}}
 
@@ -306,9 +312,8 @@ def validateInput(text, decisionType):
 
 
 def calculateScore(signals, decisionType):
-    domain = (decisionType or "").strip().lower()
-    normalized_domain = "loan" if domain == "loan approval" else domain
-    config = DECISION_CONFIG.get(normalized_domain, DECISION_CONFIG.get(domain))
+    normalized_domain = _normalize_domain(decisionType)
+    config = DECISION_CONFIG.get(normalized_domain)
     if not config:
         return 0, []
 
@@ -334,9 +339,8 @@ def calculateScore(signals, decisionType):
 
 
 def makeDecision(score, decisionType):
-    domain = (decisionType or "").strip().lower()
-    normalized_domain = "loan" if domain == "loan approval" else domain
-    config = DECISION_CONFIG.get(normalized_domain, DECISION_CONFIG.get(domain))
+    normalized_domain = _normalize_domain(decisionType)
+    config = DECISION_CONFIG.get(normalized_domain)
     if not config:
         return None
 

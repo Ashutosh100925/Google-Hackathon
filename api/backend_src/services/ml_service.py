@@ -27,30 +27,16 @@ def get_artifact_path(model_type: str, artifact_type: str) -> str:
     return os.path.join(ARTIFACT_DIR, f"{model_type}_{artifact_type}.pkl")
 
 def get_best_model(X, y):
-    models = {
-        'lr': LogisticRegression(max_iter=1000),
-        'rf': RandomForestClassifier(n_estimators=100, random_state=42),
-        'gb': GradientBoostingClassifier(n_estimators=100, random_state=42)
-    }
-    
-    best_score = 0
-    best_model = None
-    
-    for name, m in models.items():
-        m.fit(X, y)
-        score = m.score(X, y)
-        if score > best_score:
-            best_score = score
-            best_model = m
-            
-    return best_model
+    model = LogisticRegression(max_iter=1000)
+    model.fit(X, y)
+    return model
 
 def train_dummy_model(model_type: str):
     print(f"[{model_type}] Artifacts not found. Training and saving ensemble fallback models...")
     # Generate realistic data for hiring:
     # [experience(0-15), tech(0-10), performance(0-2), communication(0-3), education(1-3)]
     np.random.seed(42)
-    n_samples = 500
+    n_samples = 100
     
     X = np.zeros((n_samples, 5))
     X[:, 0] = np.random.uniform(0, 15, n_samples)  # exp

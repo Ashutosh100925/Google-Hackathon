@@ -45,3 +45,17 @@ app.include_router(analyze.router)
 @app.get("/", include_in_schema=False)
 def root_info():
     return {"status": "FairAI API is running", "endpoints": ["/analyze", "/health"]}
+
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    import traceback
+    return JSONResponse(
+        status_code=500,
+        content={
+            "success": False,
+            "error": str(exc),
+            "detail": traceback.format_exc() if not os.environ.get("VERCEL") else "Internal Server Error"
+        }
+    )
