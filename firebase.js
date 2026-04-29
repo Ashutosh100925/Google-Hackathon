@@ -1,8 +1,10 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBlF9F4XmeQnnpj8wcsrqkmnKYvlNkS2wE",
+// Use config from window.firebaseConfig (loaded from /api/firebase-config-js)
+// or fallback to a placeholder if not loaded yet
+const firebaseConfig = window.firebaseConfig || {
+  apiKey: "MISSING_API_KEY",
   authDomain: "fair-ai.firebaseapp.com",
   projectId: "fair-ai",
   storageBucket: "fair-ai.firebasestorage.app",

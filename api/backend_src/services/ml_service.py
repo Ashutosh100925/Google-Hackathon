@@ -15,7 +15,10 @@ if os.environ.get("VERCEL"):
 else:
     ARTIFACT_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "artifacts")
 
-os.makedirs(ARTIFACT_DIR, exist_ok=True)
+try:
+    os.makedirs(ARTIFACT_DIR, exist_ok=True)
+except Exception as e:
+    print(f"Warning: Could not create artifact directory {ARTIFACT_DIR}: {e}")
 
 _models = {}
 _scalers = {}

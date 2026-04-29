@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/index.py",
+      "src": "main.py",
       "use": "@vercel/python"
     },
     {
@@ -10,18 +10,14 @@
       "use": "@vercel/static"
     },
     {
-      "src": "!(api/**|*.py|requirements.txt|vercel.json)",
+      "src": "!(api/**|main.py|requirements.txt|vercel.json)",
       "use": "@vercel/static"
     }
   ],
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "api/index.py"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/$1"
+      "destination": "/main.py"
     }
   ]
 }

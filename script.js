@@ -972,7 +972,15 @@ async function runRealAnalysis() {
             })
         });
 
-        if (!response.ok) throw new Error(`API Error: ${response.status}`);
+        if (!response.ok) {
+            let errorMsg = `API Error: ${response.status}`;
+            try {
+                const errorData = await response.json();
+                if (errorData.error) errorMsg = `Error: ${errorData.error}`;
+                else if (errorData.detail) errorMsg = `Detail: ${errorData.detail}`;
+            } catch (e) {}
+            throw new Error(errorMsg);
+        }
         
         const backendData = await response.json();
         console.log("Backend Response:", backendData);
@@ -1005,7 +1013,7 @@ async function runRealAnalysis() {
         }, 1800);
     } catch (e) {
         console.error("Analysis Failure", e);
-        showInputError("Critical engine failure.");
+        showInputError(`Critical engine failure: ${e.message || "Unknown error"}`);
     } finally {
         setTimeout(() => {
             btn.innerHTML = `<svg class="w-6 h-6 text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Run Analysis`;
