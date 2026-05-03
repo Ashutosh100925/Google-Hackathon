@@ -6,51 +6,51 @@ export let provider = null;
 export let config = null;
 
 async function initFirebase() {
-    let apiBase = "";
-    if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
-        if (location.port && location.port !== "8000" && location.port !== "3000") {
-            apiBase = "http://127.0.0.1:8000";
-        }
+  let apiBase = "";
+  if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
+    if (location.port && location.port !== "8000" && location.port !== "3000") {
+      apiBase = "http://127.0.0.1:8000";
+    }
+  }
+
+  try {
+    const response = await fetch(apiBase + "/api/firebase-config");
+    config = await response.json();
+
+    // If the backend returns null for apiKey, it means environment variables aren't set in Vercel
+    if (!config.apiKey || config.apiKey === "null") {
+      config.apiKey = "MISSING_API_KEY";
     }
 
-    try {
-        const response = await fetch(apiBase + "/api/firebase-config");
-        config = await response.json();
-        
-        // If the backend returns null for apiKey, it means environment variables aren't set in Vercel
-        if (!config.apiKey || config.apiKey === "null") {
-            config.apiKey = "MISSING_API_KEY";
-        }
-        
-        // Provide safe fallbacks for non-sensitive configuration if the user forgot to add them to Vercel
-        config.authDomain = config.authDomain || "fair-ai.firebaseapp.com";
-        config.projectId = config.projectId || "fair-ai";
-        config.storageBucket = config.storageBucket || "fair-ai.firebasestorage.app";
-        config.messagingSenderId = config.messagingSenderId || "892898039826";
-        config.appId = config.appId || "1:892898039826:web:429092ad366721350fe0cb";
+    // Provide safe fallbacks for non-sensitive configuration if the user forgot to add them to Vercel
+    config.authDomain = config.authDomain || "fair-ai.firebaseapp.com";
+    config.projectId = config.projectId || "fair-ai";
+    config.storageBucket = config.storageBucket || "fair-ai.firebasestorage.app";
+    config.messagingSenderId = config.messagingSenderId || "892898039826";
+    config.appId = config.appId || "1:892898039826:web:429092ad366721350fe0cb";
 
-    } catch (error) {
-        console.warn("Failed to fetch config from backend, using fallback");
-        config = {
-            apiKey: "MISSING_API_KEY",
-            authDomain: "fair-ai.firebaseapp.com",
-            projectId: "fair-ai"
-        };
-    }
+  } catch (error) {
+    console.warn("Failed to fetch config from backend, using fallback");
+    config = {
+      apiKey: "AIzaSyBlF9F4XmeQnnpj8wcsrqkmnKYvlNkS2wE",
+      authDomain: "fair-ai.firebaseapp.com",
+      projectId: "fair-ai"
+    };
+  }
 
-    if (config.apiKey === "MISSING_API_KEY") {
-        console.warn("Firebase API Key is missing. Ensure the backend is running and providing the configuration.");
-    }
+  if (config.apiKey === "MISSING_API_KEY") {
+    console.warn("Firebase API Key is missing. Ensure the backend is running and providing the configuration.");
+  }
 
-    try {
-        const app = initializeApp(config);
-        auth = getAuth(app);
-        provider = new GoogleAuthProvider();
-    } catch (error) {
-        console.error("Firebase initialization failed:", error);
-    }
+  try {
+    const app = initializeApp(config);
+    auth = getAuth(app);
+    provider = new GoogleAuthProvider();
+  } catch (error) {
+    console.error("Firebase initialization failed:", error);
+  }
 
-    return { auth, provider, config };
+  return { auth, provider, config };
 }
 
 // Export the promise so other modules can wait for it
