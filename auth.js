@@ -1,8 +1,8 @@
 import { auth, provider } from "./firebase.js";
 import {
-  signInWithPopup,
-  signOut,
-  onAuthStateChanged
+    signInWithPopup,
+    signOut,
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 let currentUser = null;
@@ -96,7 +96,7 @@ window.executeWithCredits = (callback, amount = 2) => {
 window.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'LEVEL_COMPLETED') {
         window.addCredits(5);
-        
+
         // Show temporary earning notification
         const toast = document.createElement('div');
         toast.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-[#34D399] text-[#064E3B] px-6 py-3 rounded-full font-bold shadow-xl z-[99999] transition-opacity duration-300 pointer-events-none border border-[#059669]/20 flex items-center gap-2';
@@ -111,33 +111,33 @@ window.addEventListener('message', (event) => {
 
 // Track auth state
 onAuthStateChanged(auth, (user) => {
-  currentUser = user;
-  if (user) ensureInitialCredits();
-  updateAuthUI(user);
-  
-  if (user && pendingCallback) {
-    const callback = pendingCallback;
-    pendingCallback = null;
-    window.executeWithCredits(callback);
-  }
+    currentUser = user;
+    if (user) ensureInitialCredits();
+    updateAuthUI(user);
+
+    if (user && pendingCallback) {
+        const callback = pendingCallback;
+        pendingCallback = null;
+        window.executeWithCredits(callback);
+    }
 });
 
 // UI update logic
 function updateAuthUI(user) {
-  const signInBtns = document.querySelectorAll('.btn-ghost');
-  const userProfileContainer = document.getElementById('user-profile-container');
-  const mobileNavActions = document.querySelector('#mobile-nav-drawer .nav-actions');
+    const signInBtns = document.querySelectorAll('.btn-ghost');
+    const userProfileContainer = document.getElementById('user-profile-container');
+    const mobileNavActions = document.querySelector('#mobile-nav-drawer .nav-actions');
 
-  if (user) {
-    // User is signed in
-    signInBtns.forEach(btn => {
-        if (btn.textContent.trim().toLowerCase() === 'sign in') {
-            btn.style.display = 'none';
-        }
-    });
+    if (user) {
+        // User is signed in
+        signInBtns.forEach(btn => {
+            if (btn.textContent.trim().toLowerCase() === 'sign in') {
+                btn.style.display = 'none';
+            }
+        });
 
-    if (userProfileContainer) {
-      userProfileContainer.innerHTML = `
+        if (userProfileContainer) {
+            userProfileContainer.innerHTML = `
         <div class="user-profile flex items-center gap-3 cursor-pointer group relative">
           <img src="${user.photoURL || 'https://via.placeholder.com/40'}" alt="${user.displayName}" class="w-10 h-10 rounded-full border-2 border-purple-500/30 group-hover:border-purple-500/60 transition-all shadow-lg" onclick="toggleUserDropdown()">
           
@@ -195,39 +195,39 @@ function updateAuthUI(user) {
           </div>
         </div>
       `;
-      userProfileContainer.classList.remove('hidden');
-    }
+            userProfileContainer.classList.remove('hidden');
+        }
 
-    // Update mobile drawer
-    if (mobileNavActions) {
-        const existingProfile = mobileNavActions.querySelector('.mobile-user-profile');
-        if (!existingProfile) {
-            const profileDiv = document.createElement('div');
-            profileDiv.className = 'mobile-user-profile flex items-center gap-3 p-4 border-t border-white/5 mt-4';
-            profileDiv.innerHTML = `
+        // Update mobile drawer
+        if (mobileNavActions) {
+            const existingProfile = mobileNavActions.querySelector('.mobile-user-profile');
+            if (!existingProfile) {
+                const profileDiv = document.createElement('div');
+                profileDiv.className = 'mobile-user-profile flex items-center gap-3 p-4 border-t border-white/5 mt-4';
+                profileDiv.innerHTML = `
                 <img src="${user.photoURL || 'https://via.placeholder.com/40'}" class="w-12 h-12 rounded-full border-2 border-purple-500">
                 <div>
                     <p class="font-bold text-white">${user.displayName}</p>
                     <button onclick="handleLogout()" class="text-sm text-red-400 mt-1">Logout</button>
                 </div>
             `;
-            mobileNavActions.appendChild(profileDiv);
+                mobileNavActions.appendChild(profileDiv);
+            }
         }
-    }
-  } else {
-    // User is signed out
-    signInBtns.forEach(btn => {
-        if (btn.textContent.trim().toLowerCase() === 'sign in') {
-            btn.style.display = '';
+    } else {
+        // User is signed out
+        signInBtns.forEach(btn => {
+            if (btn.textContent.trim().toLowerCase() === 'sign in') {
+                btn.style.display = '';
+            }
+        });
+        if (userProfileContainer) {
+            userProfileContainer.innerHTML = '';
+            userProfileContainer.classList.add('hidden');
         }
-    });
-    if (userProfileContainer) {
-      userProfileContainer.innerHTML = '';
-      userProfileContainer.classList.add('hidden');
+        const mobileProfile = document.querySelector('.mobile-user-profile');
+        if (mobileProfile) mobileProfile.remove();
     }
-    const mobileProfile = document.querySelector('.mobile-user-profile');
-    if (mobileProfile) mobileProfile.remove();
-  }
 }
 
 // Global functions for HTML access
@@ -262,33 +262,33 @@ window.handleGoogleSignIn = async () => {
 };
 
 window.requireSignInBeforeAnalysis = (callback) => {
-  if (currentUser) {
-    window.executeWithCredits(callback);
-  } else {
-    pendingCallback = callback;
-    showSignInModal();
-  }
+    if (currentUser) {
+        window.executeWithCredits(callback);
+    } else {
+        pendingCallback = callback;
+        showSignInModal();
+    }
 };
 
 function showSignInModal() {
-  const modal = document.getElementById("signin-modal");
-  const overlay = document.getElementById("signin-overlay");
-  if (modal && overlay) {
-    overlay.classList.add("active");
-    modal.classList.add("active");
-    document.body.style.overflow = "hidden";
-  }
+    const modal = document.getElementById("signin-modal");
+    const overlay = document.getElementById("signin-overlay");
+    if (modal && overlay) {
+        overlay.classList.add("active");
+        modal.classList.add("active");
+        document.body.style.overflow = "hidden";
+    }
 }
 
 window.hideSignInModal = () => {
-  const modal = document.getElementById("signin-modal");
-  const overlay = document.getElementById("signin-overlay");
-  if (modal && overlay) {
-    overlay.classList.remove("active");
-    modal.classList.remove("active");
-    document.body.style.overflow = "";
-    pendingCallback = null;
-  }
+    const modal = document.getElementById("signin-modal");
+    const overlay = document.getElementById("signin-overlay");
+    if (modal && overlay) {
+        overlay.classList.remove("active");
+        modal.classList.remove("active");
+        document.body.style.overflow = "";
+        pendingCallback = null;
+    }
 };
 
 // Close dropdown when clicking outside

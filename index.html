@@ -83,7 +83,9 @@
         }
 
         @keyframes canvasFadeIn {
-            to { opacity: 1; }
+            to {
+                opacity: 1;
+            }
         }
 
         .xm6-overlay {
@@ -280,6 +282,7 @@
                 transform: translateY(30px) scale(0.97);
                 filter: blur(8px);
             }
+
             100% {
                 opacity: 1;
                 transform: translateY(0) scale(1);
@@ -388,40 +391,50 @@
                 margin-top: -40px;
             }
         }
+
         /* Explicit Light Mode Overrides for Analysis View */
         :root:not(.dark-mode) #analysis-view,
         :root:not(.dark-mode) #analysis-view .bg-bg {
             background-color: #ffffff !important;
             color: #000000 !important;
         }
+
         :root:not(.dark-mode) #analysis-view .bg-surface {
             background-color: #ffffff !important;
             border-color: rgba(0, 0, 0, 0.1) !important;
         }
+
         :root:not(.dark-mode) #analysis-view .bg-surface-2 {
             background-color: #f1f3f4 !important;
         }
+
         :root:not(.dark-mode) #analysis-view .text-ink {
             color: #000000 !important;
         }
+
         :root:not(.dark-mode) #analysis-view .text-ink-3 {
             color: #2a2a2a !important;
         }
+
         :root:not(.dark-mode) #analysis-view .border-ink\/10,
         :root:not(.dark-mode) #analysis-view .border-ink\/5 {
             border-color: rgba(0, 0, 0, 0.1) !important;
         }
+
         :root:not(.dark-mode) .decision-panel {
             background: #ffffff !important;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
         }
+
         :root:not(.dark-mode) .decision-option {
             background: #f8f9fa !important;
-            border-color: rgba(0,0,0,0.08) !important;
+            border-color: rgba(0, 0, 0, 0.08) !important;
         }
+
         :root:not(.dark-mode) .subnav-btn.bg-ink\/10 {
-            background-color: rgba(0,0,0,0.05) !important;
+            background-color: rgba(0, 0, 0, 0.05) !important;
         }
+
         :root:not(.dark-mode) #fairness-section circle[stroke="#2D333D"] {
             stroke: #e8eaed !important;
         }
@@ -824,7 +837,8 @@
                         <div class="team-info">
                             <h3 class="team-name">Subhrajit Parida</h3>
                             <div class="team-role">Member</div>
-                            <p class="team-bio">Expert in crafting intuitive UI/UX designs focused on usability, accessibility, and seamless interaction.</p>
+                            <p class="team-bio">Expert in crafting intuitive UI/UX designs focused on usability,
+                                accessibility, and seamless interaction.</p>
                         </div>
                     </div>
                     <div class="team-card">
@@ -834,7 +848,8 @@
                         <div class="team-info">
                             <h3 class="team-name">Ashutosh Swain</h3>
                             <div class="team-role">Head of Product</div>
-                            <p class="team-bio">Expert in product strategy, UI/UX design, and building intelligent AI-driven solutions.</p>
+                            <p class="team-bio">Expert in product strategy, UI/UX design, and building intelligent
+                                AI-driven solutions.</p>
                         </div>
                     </div>
                     <div class="team-card">
@@ -844,7 +859,8 @@
                         <div class="team-info">
                             <h3 class="team-name">Sambhab Tripathy</h3>
                             <div class="team-role">Member</div>
-                            <p class="team-bio">Specialist in visual storytelling, presentation design, and impactful communication of complex ideas</p>
+                            <p class="team-bio">Specialist in visual storytelling, presentation design, and impactful
+                                communication of complex ideas</p>
                         </div>
                     </div>
                     <div class="team-card">
@@ -854,7 +870,8 @@
                         <div class="team-info">
                             <h3 class="team-name">Stiti Pragyan Sahoo</h3>
                             <div class="team-role">Memeber</div>
-                            <p class="team-bio">Specialist in product strategy, user-centric design, and aligning technology with real-world impact.</p>
+                            <p class="team-bio">Specialist in product strategy, user-centric design, and aligning
+                                technology with real-world impact.</p>
                         </div>
                     </div>
                 </div>
@@ -943,8 +960,8 @@
                                 class="mt-4 text-2xl font-semibold text-ink cursor-pointer">Drag & drop your file here
                             </p>
                             <p class="mt-1 text-sm text-ink-3">Supports CSV, JSON or direct text input</p>
-                            <input type="file" id="file-upload" class="hidden" accept=".txt,.pdf,.docx,.doc,.png,.jpg,.jpeg"
-                                onchange="handleFileUpload(event)">
+                            <input type="file" id="file-upload" class="hidden"
+                                accept=".txt,.pdf,.docx,.doc,.png,.jpg,.jpeg" onchange="handleFileUpload(event)">
                         </div>
 
                         <div class="w-full relative mt-5">
@@ -1000,8 +1017,8 @@
                                 </span>
                             </button>
 
-                            <button id="btn-loan" onclick="setDecisionType(this, 'loan')" class="decision-btn decision-option"
-                                type="button" aria-pressed="false">
+                            <button id="btn-loan" onclick="setDecisionType(this, 'loan')"
+                                class="decision-btn decision-option" type="button" aria-pressed="false">
                                 <span class="decision-option__icon decision-option__icon--blue" aria-hidden="true">
                                     <svg viewBox="0 0 24 24" fill="none">
                                         <rect x="3.5" y="6.5" width="17" height="11" rx="2.5" stroke="currentColor"
@@ -1022,8 +1039,8 @@
                                 </span>
                             </button>
 
-                            <button id="btn-admission" onclick="setDecisionType(this, 'admission')" class="decision-btn decision-option"
-                                type="button" aria-pressed="false">
+                            <button id="btn-admission" onclick="setDecisionType(this, 'admission')"
+                                class="decision-btn decision-option" type="button" aria-pressed="false">
                                 <span class="decision-option__icon decision-option__icon--violet" aria-hidden="true">
                                     <svg viewBox="0 0 24 24" fill="none">
                                         <path d="M12 4l9 4.5-9 4.5L3 8.5 12 4z" fill="currentColor" />
@@ -1046,7 +1063,8 @@
                     </div>
                 </div>
 
-                <div id="mismatch-warning-banner" class="hidden mt-4 p-4 rounded-xl border border-red-500/30 bg-red-500/10 flex items-start gap-3">
+                <div id="mismatch-warning-banner"
+                    class="hidden mt-4 p-4 rounded-xl border border-red-500/30 bg-red-500/10 flex items-start gap-3">
                     <span class="text-xl">⚠️</span>
                     <p id="mismatch-warning-text" class="text-[15px] text-red-400 font-medium"></p>
                 </div>
@@ -1135,9 +1153,11 @@
                         </svg>
                     </div>
                     <div class="flex-1 w-full">
-                        <div id="detection-badge" class="inline-flex items-center gap-2 bg-surface-2 border-ink/10 rounded-full px-4 py-2 mb-4 hidden">
+                        <div id="detection-badge"
+                            class="inline-flex items-center gap-2 bg-surface-2 border-ink/10 rounded-full px-4 py-2 mb-4 hidden">
                             <span class="text-[12px] font-bold text-ink-2 tracking-wide uppercase">Engine:</span>
-                            <span id="detected-type-label" class="text-[12px] font-extrabold text-blue-500 uppercase">Detecting...</span>
+                            <span id="detected-type-label"
+                                class="text-[12px] font-extrabold text-blue-500 uppercase">Detecting...</span>
                             <span class="mx-1 text-ink/20">|</span>
                             <span id="detection-confidence" class="text-[12px] font-bold text-ink-3">0% Match</span>
                         </div>
@@ -1147,22 +1167,19 @@
                             ACCEPTED
                         </h2>
                         <div class="flex flex-wrap justify-center md:justify-start gap-3 md:gap-4 w-full">
-                            <div
-                                class="flex items-center gap-2 bg-surface-2 border-ink/10 rounded-full px-4 py-2">
+                            <div class="flex items-center gap-2 bg-surface-2 border-ink/10 rounded-full px-4 py-2">
                                 <div class="w-2.5 h-2.5 rounded-full bg-[#3B82F6]"></div>
                                 <span
                                     class="text-[12px] md:text-[13px] font-bold text-ink-3 tracking-wide uppercase">Bias
                                     Checked</span>
                             </div>
-                            <div
-                                class="flex items-center gap-2 bg-surface-2 border-ink/10 rounded-full px-4 py-2">
+                            <div class="flex items-center gap-2 bg-surface-2 border-ink/10 rounded-full px-4 py-2">
                                 <div class="w-2.5 h-2.5 rounded-full bg-[#A855F7]"></div>
                                 <span
                                     class="text-[12px] md:text-[13px] font-bold text-ink-3 tracking-wide uppercase">Fairness
                                     Verified</span>
                             </div>
-                            <div
-                                class="flex items-center gap-2 bg-surface-2 border-ink/10 rounded-full px-4 py-2">
+                            <div class="flex items-center gap-2 bg-surface-2 border-ink/10 rounded-full px-4 py-2">
                                 <div class="w-2.5 h-2.5 rounded-full bg-[#00D64F]"></div>
                                 <span
                                     class="text-[12px] md:text-[13px] font-bold text-ink-3 tracking-wide uppercase">Ethical
@@ -1329,24 +1346,20 @@
                     <div class="flex flex-col md:flex-row justify-between gap-5 mt-auto z-10 w-full pt-10 md:pt-6">
                         <div
                             class="flex flex-col items-center justify-center bg-surface-2 rounded-2xl flex-1 py-6 border border-ink/10 shadow-inner">
-                            <span id="stat-decisions"
-                                class="text-[28px] text-ink leading-none">1,247</span>
+                            <span id="stat-decisions" class="text-[28px] text-ink leading-none">1,247</span>
                             <span class="text-[12px] text-ink-3 font-bold mt-2 tracking-wide uppercase">Decisions
                                 Analyzed</span>
                         </div>
                         <div
                             class="flex flex-col items-center justify-center bg-surface-2 rounded-2xl flex-1 py-6 border border-ink/10 shadow-inner">
-                            <span id="stat-incidents"
-                                class="text-[28px] text-ink leading-none">23</span>
+                            <span id="stat-incidents" class="text-[28px] text-ink leading-none">23</span>
                             <span class="text-[12px] text-ink-3 font-bold mt-2 tracking-wide uppercase">Bias
                                 Incidents</span>
                         </div>
                         <div
                             class="flex flex-col items-center justify-center bg-surface-2 rounded-2xl flex-1 py-6 border border-ink/10 shadow-inner">
-                            <span id="stat-accuracy"
-                                class="text-[28px] text-ink leading-none">94.3%</span>
-                            <span
-                                class="text-[12px] text-ink-3 font-bold mt-2 tracking-wide uppercase">Accuracy</span>
+                            <span id="stat-accuracy" class="text-[28px] text-ink leading-none">94.3%</span>
+                            <span class="text-[12px] text-ink-3 font-bold mt-2 tracking-wide uppercase">Accuracy</span>
                         </div>
                     </div>
                 </div>
@@ -1403,15 +1416,14 @@
 
                     <div
                         class="bg-surface-2 border-ink/10 rounded-[16px] p-6 flex gap-5 items-center mt-auto shadow-inner">
-                        <div
-                            class="w-10 h-10 rounded-xl bg-surface border-ink/10">
+                        <div class="w-10 h-10 rounded-xl bg-surface border-ink/10">
                             <div class="w-3 h-3 rounded-full bg-[#00D64F] shadow-[0_0_10px_rgba(0,214,79,0.9)]"></div>
                         </div>
                         <div>
                             <p id="bias-overall-status-title"
                                 class="text-[15px] font-bold text-[#00D64F] tracking-wide mb-1">Overall Status</p>
-                            <p id="bias-overall-status-desc"
-                                class="text-[14px] text-ink-3 tracking-wide font-medium">Low bias detected across all
+                            <p id="bias-overall-status-desc" class="text-[14px] text-ink-3 tracking-wide font-medium">
+                                Low bias detected across all
                                 categories</p>
                         </div>
                     </div>
@@ -1510,28 +1522,45 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
     <!-- Sign In Modal -->
-    <div id="signin-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] opacity-0 pointer-events-none transition-opacity duration-300" onclick="hideSignInModal()"></div>
-    <div id="signin-modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[420px] bg-[#131936] border border-white/10 rounded-[32px] p-8 md:p-10 z-[1001] opacity-0 scale-90 pointer-events-none transition-all duration-300 shadow-[0_20px_70px_rgba(0,0,0,0.6)]">
+    <div id="signin-overlay"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] opacity-0 pointer-events-none transition-opacity duration-300"
+        onclick="hideSignInModal()"></div>
+    <div id="signin-modal"
+        class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[420px] bg-[#131936] border border-white/10 rounded-[32px] p-8 md:p-10 z-[1001] opacity-0 scale-90 pointer-events-none transition-all duration-300 shadow-[0_20px_70px_rgba(0,0,0,0.6)]">
         <div class="text-center">
-            <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-blue-500/20 mb-6">
+            <div
+                class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-blue-500/20 mb-6">
                 <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                    </path>
                 </svg>
             </div>
             <h2 class="text-3xl font-bold text-white mb-2">Sign in to analyze</h2>
-            <p class="text-gray-400 mb-10 leading-relaxed">Please sign in with Google to continue with candidate analysis and bias auditing.</p>
-            
+            <p class="text-gray-400 mb-10 leading-relaxed">Please sign in with Google to continue with candidate
+                analysis and bias auditing.</p>
+
             <div class="space-y-4">
-                <button onclick="handleGoogleSignIn()" class="w-full py-4 px-6 bg-white text-[#0B0F19] rounded-full font-bold flex items-center justify-center gap-3 hover:bg-gray-100 transition-colors shadow-lg">
+                <button onclick="handleGoogleSignIn()"
+                    class="w-full py-4 px-6 bg-white text-[#0B0F19] rounded-full font-bold flex items-center justify-center gap-3 hover:bg-gray-100 transition-colors shadow-lg">
                     <svg class="w-6 h-6" viewBox="0 0 24 24">
-                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        <path
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                            fill="#4285F4" />
+                        <path
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                            fill="#34A853" />
+                        <path
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+                            fill="#FBBC05" />
+                        <path
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                            fill="#EA4335" />
                     </svg>
                     Sign in with Google
                 </button>
-                <button onclick="hideSignInModal()" class="w-full py-4 px-6 text-gray-400 font-bold hover:text-white transition-colors">
+                <button onclick="hideSignInModal()"
+                    class="w-full py-4 px-6 text-gray-400 font-bold hover:text-white transition-colors">
                     Cancel
                 </button>
             </div>
@@ -1682,39 +1711,60 @@
     </script>
 
     <!-- Low Credits Modal -->
-    <div id="low-credits-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] opacity-0 pointer-events-none transition-opacity duration-300" onclick="closeLowCreditsModal()"></div>
-    <div id="low-credits-modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-[#2D2E30] border border-white/10 rounded-[28px] p-8 z-[10001] opacity-0 pointer-events-none transition-all duration-300 scale-95 shadow-[0_24px_54px_rgba(0,0,0,0.5)] flex flex-col items-center text-center">
-        <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
+    <div id="low-credits-overlay"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] opacity-0 pointer-events-none transition-opacity duration-300"
+        onclick="closeLowCreditsModal()"></div>
+    <div id="low-credits-modal"
+        class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-[#2D2E30] border border-white/10 rounded-[28px] p-8 z-[10001] opacity-0 pointer-events-none transition-all duration-300 scale-95 shadow-[0_24px_54px_rgba(0,0,0,0.5)] flex flex-col items-center text-center">
+        <div
+            class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
             <svg class="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
         </div>
         <h3 class="text-2xl font-bold text-white mb-2">Low Credits</h3>
-        <p class="text-gray-300 mb-6 leading-relaxed">No issue! Play our mini-game to gain more credits and continue your analysis.</p>
+        <p class="text-gray-300 mb-6 leading-relaxed">No issue! Play our mini-game to gain more credits and continue
+            your analysis.</p>
         <div class="w-full flex gap-3">
-            <button onclick="closeLowCreditsModal()" class="flex-1 py-3 bg-[#3C4043] hover:bg-[#4a4d51] text-white rounded-full font-medium transition-colors border border-white/5">Cancel</button>
-            <button onclick="openGameOverlay()" class="flex-1 py-3 bg-[#E8EAED] text-[#202124] hover:bg-white rounded-full font-medium transition-colors">Play Game</button>
+            <button onclick="closeLowCreditsModal()"
+                class="flex-1 py-3 bg-[#3C4043] hover:bg-[#4a4d51] text-white rounded-full font-medium transition-colors border border-white/5">Cancel</button>
+            <button onclick="openGameOverlay()"
+                class="flex-1 py-3 bg-[#E8EAED] text-[#202124] hover:bg-white rounded-full font-medium transition-colors">Play
+                Game</button>
         </div>
     </div>
 
     <!-- Game Overlay Background -->
-    <div id="game-overlay-bg" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[10005] hidden transition-opacity duration-300 opacity-0 pointer-events-none" onclick="closeGameOverlay()"></div>
-    
+    <div id="game-overlay-bg"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[10005] hidden transition-opacity duration-300 opacity-0 pointer-events-none"
+        onclick="closeGameOverlay()"></div>
+
     <!-- Game Modal -->
-    <div id="game-overlay" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-4xl h-[85vh] z-[10006] bg-[#111] border border-white/10 rounded-[28px] hidden flex-col overflow-hidden shadow-[0_24px_54px_rgba(0,0,0,0.5)] transition-all duration-300 opacity-0 pointer-events-none scale-95">
-        <div class="h-14 bg-[#1A1C1E] border-b border-white/10 flex items-center justify-between px-6 shrink-0 relative z-[10007]">
+    <div id="game-overlay"
+        class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-4xl h-[85vh] z-[10006] bg-[#111] border border-white/10 rounded-[28px] hidden flex-col overflow-hidden shadow-[0_24px_54px_rgba(0,0,0,0.5)] transition-all duration-300 opacity-0 pointer-events-none scale-95">
+        <div
+            class="h-14 bg-[#1A1C1E] border-b border-white/10 flex items-center justify-between px-6 shrink-0 relative z-[10007]">
             <div class="text-white font-medium flex items-center gap-2">
-                <svg class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <svg class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 Color Grid Connect
             </div>
             <div class="flex items-center gap-4">
-                <div class="bg-purple-500/20 border border-purple-500/30 px-3 py-1 rounded-full flex items-center gap-2 hidden sm:flex">
+                <div
+                    class="bg-purple-500/20 border border-purple-500/30 px-3 py-1 rounded-full flex items-center gap-2 hidden sm:flex">
                     <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
                     <span class="text-xs text-purple-200 font-medium">Earn 5 credits per level</span>
                 </div>
-                <button onclick="closeGameOverlay()" class="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white">
+                <button onclick="closeGameOverlay()"
+                    class="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
@@ -1726,7 +1776,7 @@
         function closeLowCreditsModal() {
             const modal = document.getElementById('low-credits-modal');
             const overlay = document.getElementById('low-credits-overlay');
-            if(modal && overlay) {
+            if (modal && overlay) {
                 modal.classList.remove('active');
                 overlay.classList.remove('active');
             }
@@ -1736,7 +1786,7 @@
             const overlayBg = document.getElementById('game-overlay-bg');
             const overlay = document.getElementById('game-overlay');
             const iframe = document.getElementById('game-iframe');
-            if(overlay && iframe && overlayBg) {
+            if (overlay && iframe && overlayBg) {
                 overlayBg.classList.remove('hidden');
                 overlay.classList.remove('hidden');
                 overlay.classList.add('flex');
@@ -1753,7 +1803,7 @@
             const overlayBg = document.getElementById('game-overlay-bg');
             const overlay = document.getElementById('game-overlay');
             const iframe = document.getElementById('game-iframe');
-            if(overlay && iframe && overlayBg) {
+            if (overlay && iframe && overlayBg) {
                 overlayBg.classList.add('opacity-0', 'pointer-events-none');
                 overlay.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
                 overlay.classList.remove('scale-100');
