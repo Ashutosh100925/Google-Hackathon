@@ -283,8 +283,8 @@ window.handleGoogleSignIn = async () => {
             window.executeWithCredits(callback);
         }
     } catch (error) {
-        alert("Sign in failed. Please try again.");
-        console.error(error);
+        alert("Sign in failed: " + error.message);
+        console.error("Detailed sign-in error:", error);
     }
 };
 
