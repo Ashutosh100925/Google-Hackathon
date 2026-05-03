@@ -20,6 +20,13 @@ if (firebaseConfig.apiKey === "MISSING_API_KEY") {
 
 export const config = firebaseConfig;
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const provider = new GoogleAuthProvider();
+export let auth = null;
+export let provider = null;
+
+try {
+    const app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    provider = new GoogleAuthProvider();
+} catch (error) {
+    console.error("Firebase initialization failed:", error);
+}

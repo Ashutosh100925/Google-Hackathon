@@ -110,9 +110,10 @@ window.addEventListener('message', (event) => {
 });
 
 // Track auth state
-onAuthStateChanged(auth, (user) => {
-    currentUser = user;
-    if (user) ensureInitialCredits();
+if (auth) {
+    onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        if (user) ensureInitialCredits();
     updateAuthUI(user);
 
     if (user && pendingCallback) {
@@ -121,6 +122,9 @@ onAuthStateChanged(auth, (user) => {
         window.executeWithCredits(callback);
     }
 });
+} else {
+    console.warn("Auth object is null. Firebase features are disabled.");
+}
 
 // UI update logic
 function updateAuthUI(user) {
@@ -249,7 +253,7 @@ window.handleGoogleSignIn = async () => {
         const result = await signInWithPopup(auth, provider);
         currentUser = result.user;
         ensureInitialCredits();
-        hideSignInModal();
+        window.hideSignInModal();
         if (pendingCallback) {
             const callback = pendingCallback;
             pendingCallback = null;
@@ -270,33 +274,13 @@ window.requireSignInBeforeAnalysis = (callback) => {
         window.executeWithCredits(callback);
     } else {
         pendingCallback = callback;
-        showSignInModal();
+        window.showSignInModal();
     }
 };
 
-window.showSignInModal = function() {
-    console.log("Showing sign-in modal...");
-    const modal = document.getElementById("signin-modal");
-    const overlay = document.getElementById("signin-overlay");
-    if (modal && overlay) {
-        overlay.classList.add("active");
-        modal.classList.add("active");
-        document.body.style.overflow = "hidden";
-    } else {
-        console.error("Sign-in modal elements not found!");
-    }
-}
+// Modal logic moved to index.html to guarantee it works immediately
 
-window.hideSignInModal = () => {
-    const modal = document.getElementById("signin-modal");
-    const overlay = document.getElementById("signin-overlay");
-    if (modal && overlay) {
-        overlay.classList.remove("active");
-        modal.classList.remove("active");
-        document.body.style.overflow = "";
-        pendingCallback = null;
-    }
-};
+// hideSignInModal moved to index.html
 
 // Close dropdown when clicking outside
 document.addEventListener('click', (e) => {

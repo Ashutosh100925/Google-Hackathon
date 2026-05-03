@@ -518,7 +518,26 @@
                             d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 110 8 4 4 0 010-8z" />
                     </svg>
                 </div>
-                <script>window.showSignInModal = window.showSignInModal || (() => console.log("Auth module not ready"));</script>
+                <script>
+                    window.showSignInModal = function() {
+                        const modal = document.getElementById("signin-modal");
+                        const overlay = document.getElementById("signin-overlay");
+                        if (modal && overlay) {
+                            overlay.classList.add("active");
+                            modal.classList.add("active");
+                            document.body.style.overflow = "hidden";
+                        }
+                    };
+                    window.hideSignInModal = function() {
+                        const modal = document.getElementById("signin-modal");
+                        const overlay = document.getElementById("signin-overlay");
+                        if (modal && overlay) {
+                            overlay.classList.remove("active");
+                            modal.classList.remove("active");
+                            document.body.style.overflow = "";
+                        }
+                    };
+                </script>
                 <button class="btn-ghost hidden md:block" onclick="showSignInModal()">Sign in</button>
                 <button class="btn-primary hidden md:block" onclick="showView('analysis')">Get started</button>
                 <div id="user-profile-container" class="hidden md:block"></div>
