@@ -9,18 +9,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Display:wght@400;500;700&family=Google+Sans+Text:wght@400;500&family=Roboto+Mono:wght@400;500&display=swap"
         rel="stylesheet" />
-    <!-- Firebase Configuration (Loaded dynamically to hide keys) -->
-    <script>
-        (function() {
-            var apiBase = "";
-            if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
-                if (location.port && location.port !== "8000" && location.port !== "3000") {
-                    apiBase = "http://127.0.0.1:8000";
-                }
-            }
-            document.write('<script src="' + apiBase + '/api/firebase-config-js"><\/script>');
-        })();
-    </script>
+    <!-- Firebase Configuration is now handled entirely within firebase.js asynchronously -->
 
     <link rel="stylesheet" href="/style.css">
 

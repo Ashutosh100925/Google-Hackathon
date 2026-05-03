@@ -1,4 +1,8 @@
-import { auth, provider } from "./firebase.js";
+import { firebaseInitPromise } from "./firebase.js";
+
+let auth = null;
+let provider = null;
+let config = null;
 import {
     signInWithPopup,
     signOut,
@@ -109,22 +113,29 @@ window.addEventListener('message', (event) => {
     }
 });
 
-// Track auth state
-if (auth) {
-    onAuthStateChanged(auth, (user) => {
-        currentUser = user;
-        if (user) ensureInitialCredits();
-    updateAuthUI(user);
+// Initialize Auth state tracking once ready
+firebaseInitPromise.then((fb) => {
+    auth = fb.auth;
+    provider = fb.provider;
+    config = fb.config;
 
-    if (user && pendingCallback) {
-        const callback = pendingCallback;
-        pendingCallback = null;
-        window.executeWithCredits(callback);
+    if (auth) {
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) ensureInitialCredits();
+            updateAuthUI(user);
+
+            if (user && pendingCallback) {
+                const callback = pendingCallback;
+                pendingCallback = null;
+                window.executeWithCredits(callback);
+            }
+        });
+    } else {
+        console.warn("Auth object is null. Firebase features are disabled.");
     }
 });
-} else {
-    console.warn("Auth object is null. Firebase features are disabled.");
-}
+
 
 // UI update logic
 function updateAuthUI(user) {
@@ -241,6 +252,7 @@ window.toggleUserDropdown = () => {
 };
 
 window.handleLogout = async () => {
+    if (!auth) await firebaseInitPromise;
     try {
         await signOut(auth);
     } catch (error) {
@@ -249,6 +261,17 @@ window.handleLogout = async () => {
 };
 
 window.handleGoogleSignIn = async () => {
+    if (!auth) await firebaseInitPromise;
+    
+    if (!auth) {
+        if (config && config.apiKey === "MISSING_API_KEY") {
+            alert("Configuration Error: Firebase API Key is missing. Ensure the backend is running and providing the configuration.");
+        } else {
+            alert("Firebase initialization failed. Please try again.");
+        }
+        return;
+    }
+
     try {
         const result = await signInWithPopup(auth, provider);
         currentUser = result.user;
@@ -260,11 +283,7 @@ window.handleGoogleSignIn = async () => {
             window.executeWithCredits(callback);
         }
     } catch (error) {
-        if (config.apiKey === "MISSING_API_KEY") {
-            alert("Configuration Error: Firebase API Key is missing. Ensure the backend is running and providing the configuration.");
-        } else {
-            alert("Sign in failed. Please try again.");
-        }
+        alert("Sign in failed. Please try again.");
         console.error(error);
     }
 };
