@@ -256,7 +256,11 @@ window.handleGoogleSignIn = async () => {
             window.executeWithCredits(callback);
         }
     } catch (error) {
-        alert("Sign in failed. Please try again.");
+        if (config.apiKey === "MISSING_API_KEY") {
+            alert("Configuration Error: Firebase API Key is missing. Ensure the backend is running and providing the configuration.");
+        } else {
+            alert("Sign in failed. Please try again.");
+        }
         console.error(error);
     }
 };
