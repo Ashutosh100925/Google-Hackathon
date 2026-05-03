@@ -518,7 +518,8 @@
                             d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 110 8 4 4 0 010-8z" />
                     </svg>
                 </div>
-                <button class="btn-ghost hidden md:block">Sign in</button>
+                <script>window.showSignInModal = window.showSignInModal || (() => console.log("Auth module not ready"));</script>
+                <button class="btn-ghost hidden md:block" onclick="showSignInModal()">Sign in</button>
                 <button class="btn-primary hidden md:block" onclick="showView('analysis')">Get started</button>
                 <div id="user-profile-container" class="hidden md:block"></div>
 
@@ -543,7 +544,7 @@
         <a class="nav-link" href="#whatif" onclick="showView('analysis'); toggleMobileMenu()">What-If</a>
         <a class="nav-link" href="#trust" onclick="showView('analysis'); toggleMobileMenu()">Responsible AI</a>
         <div class="nav-actions">
-            <button class="btn-ghost w-full">Sign in</button>
+            <button class="btn-ghost w-full" onclick="showSignInModal()">Sign in</button>
             <button class="btn-primary w-full" onclick="showView('analysis'); toggleMobileMenu()">Get started</button>
         </div>
     </div>

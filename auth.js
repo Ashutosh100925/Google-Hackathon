@@ -274,13 +274,16 @@ window.requireSignInBeforeAnalysis = (callback) => {
     }
 };
 
-function showSignInModal() {
+window.showSignInModal = function() {
+    console.log("Showing sign-in modal...");
     const modal = document.getElementById("signin-modal");
     const overlay = document.getElementById("signin-overlay");
     if (modal && overlay) {
         overlay.classList.add("active");
         modal.classList.add("active");
         document.body.style.overflow = "hidden";
+    } else {
+        console.error("Sign-in modal elements not found!");
     }
 }
 
@@ -304,13 +307,14 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Hook into general sign-in buttons
+// Hook into general sign-in buttons as a backup
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("Auth script initialized, attaching backup listeners...");
     document.querySelectorAll('.btn-ghost').forEach(btn => {
         if (btn.textContent.trim().toLowerCase() === 'sign in') {
             btn.onclick = (e) => {
                 e.preventDefault();
-                showSignInModal();
+                window.showSignInModal();
             };
         }
     });

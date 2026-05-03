@@ -14,6 +14,8 @@ const firebaseConfig = window.firebaseConfig || {
 
 if (firebaseConfig.apiKey === "MISSING_API_KEY") {
   console.warn("Firebase API Key is missing. Ensure the backend is running and providing the configuration.");
+} else {
+  console.log("Firebase initialized successfully with config from window.");
 }
 
 export const config = firebaseConfig;
