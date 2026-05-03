@@ -793,6 +793,110 @@ function getExplanation(signals, type, text = '') {
     return parts.join('. ') || "Limited feature signals detected in the profile.";
 }
 
+function fairAiNormalizeDecisionType(mt) {
+    const s = String(mt || '').trim();
+    const u = s.toUpperCase().replace(/-/g, '_');
+    if (u === 'HIRING' || u === 'HIRE') return 'HIRING';
+    if (u === 'LOAN_APPROVAL' || u === 'LOAN') return 'LOAN_APPROVAL';
+    if (u === 'COLLEGE_ADMISSION' || u === 'ADMISSION' || u === 'COLLEGE') return 'COLLEGE_ADMISSION';
+    const l = s.toLowerCase();
+    if (l === 'loan') return 'LOAN_APPROVAL';
+    if (l === 'admission') return 'COLLEGE_ADMISSION';
+    if (l === 'hiring') return 'HIRING';
+    return 'HIRING';
+}
+
+function fairAiModelTypeToDetection(mt) {
+    return { type: fairAiNormalizeDecisionType(mt), confidence: 85 };
+}
+
+function fairAiDriverKeysForType(domainType) {
+    if (domainType === 'COLLEGE_ADMISSION') return ['academics', 'projects', 'achievements'];
+    if (domainType === 'LOAN_APPROVAL') return ['creditScore', 'income', 'repayment'];
+    return ['skills', 'experience', 'projects'];
+}
+
+function fairAiSignalsHaveDrivers(signals, domainType) {
+    const levels = new Set(['high', 'medium', 'low', 'none']);
+    return fairAiDriverKeysForType(domainType).some((k) => levels.has(String(signals[k] || '').toLowerCase()));
+}
+
+/**
+ * Map ML API payload + optional auto-detection into the same shape desktop updateUI() expects.
+ * Fills signal drivers via callGemmaAPI when fairness_metrics are not usable.
+ */
+async function fairAiBuildFinalDataFromBackend(backendData, detection, profileText) {
+    const det = detection && detection.type
+        ? { ...detection, type: fairAiNormalizeDecisionType(detection.type) }
+        : fairAiModelTypeToDetection(backendData.model_type);
+    const br = backendData.bias_report || {};
+    const pg = br.protected_groups_impact || {};
+
+    let fairness;
+    if (br.overall_bias_score != null && !Number.isNaN(Number(br.overall_bias_score))) {
+        fairness = Math.round((1 - Number(br.overall_bias_score)) * 100);
+    } else {
+        fairness = Math.max(0, Math.min(100, Math.round(Number(backendData.fairness_score) || 0)));
+    }
+
+    let penalties = {
+        gender: Math.round((Number(pg.gender) || 0) * 100),
+        age: Math.round((Number(pg.age) || 0) * 100),
+        education: Math.round((Number(pg.education) || 0) * 100),
+    };
+    const rawText = (profileText || '').trim();
+    if (penalties.gender === 0 && penalties.age === 0 && penalties.education === 0 && rawText.length >= 20) {
+        penalties = calculateFairness(rawText).penalties;
+    }
+
+    let signals = Object.assign({}, backendData.fairness_metrics || {});
+    delete signals.demographic_parity;
+
+    const gemmaInput = rawText.length > 12
+        ? rawText
+        : JSON.stringify(backendData.structured_features || backendData.features || {});
+
+    if (!fairAiSignalsHaveDrivers(signals, det.type)) {
+        signals = await callGemmaAPI(gemmaInput, det.type);
+    }
+
+    const calc = calculateScore(signals, det.type, rawText);
+    const score = Number(calc.score);
+
+    let confidence;
+    const backendConf = backendData.confidence_score;
+    if (backendConf != null && !Number.isNaN(Number(backendConf))) {
+        confidence = Math.round(Number(backendConf) * 100);
+    } else {
+        const sc = Number(backendData.score);
+        confidence = Number.isFinite(sc)
+            ? Math.round(sc > 50 ? sc : 100 - sc)
+            : calculateConfidence(rawText || gemmaInput, signals);
+    }
+
+    const decision = backendData.decision || backendData.prediction || calc.decision;
+    let explanation = backendData.explanation;
+    if (!explanation || String(explanation).length < 5) {
+        explanation = getExplanation(signals, det.type, rawText);
+    }
+
+    return {
+        detection: det,
+        signals,
+        score,
+        decision,
+        fairness,
+        penalties,
+        confidence,
+        explanation,
+    };
+}
+
+window.fairAiNormalizeDecisionType = fairAiNormalizeDecisionType;
+window.fairAiModelTypeToDetection = fairAiModelTypeToDetection;
+window.fairAiDriverKeysForType = fairAiDriverKeysForType;
+window.fairAiBuildFinalDataFromBackend = fairAiBuildFinalDataFromBackend;
+
 function updateUI(data) {
     const { detection, signals, score, decision, fairness, confidence, explanation, penalties } = data;
     
@@ -875,12 +979,13 @@ function updateUI(data) {
     
     const expEl = document.getElementById('ai-explanation');
     if (expEl) {
+        const scoreDisp = Number.isFinite(Number(score)) ? Number(score).toFixed(1) : '—';
         expEl.innerHTML = `
             <div class="space-y-4">
                 <p class="text-[16px] leading-relaxed italic text-ink-2">"${explanation}"</p>
                 <div class="mt-4 pt-4 border-t border-ink/10">
                     <span class="text-[12px] font-bold tracking-widest text-ink uppercase">System Insight</span>
-                    <p class="text-ink font-medium mt-1">Weighted Signal Analysis: Score ${score.toFixed(1)}/100. Integrity Check: ${fairness}%. Recommendation: ${decision}.</p>
+                    <p class="text-ink font-medium mt-1">Weighted Signal Analysis: Score ${scoreDisp}/100. Integrity Check: ${fairness}%. Recommendation: ${decision}.</p>
                 </div>
             </div>
         `;
@@ -985,28 +1090,10 @@ async function runRealAnalysis() {
         const backendData = await response.json();
         console.log("Backend Response:", backendData);
 
-        // Map backend response to frontend format
-        const finalData = {
-            detection,
-            signals: backendData.fairness_metrics || {}, // Assuming signals are in fairness_metrics or similar
-            score: backendData.score,
-            decision: backendData.decision,
-            fairness: Math.round((1 - (backendData.bias_report?.overall_bias_score || 0)) * 100),
-            penalties: {
-                gender: Math.round((backendData.bias_report?.protected_groups_impact?.gender || 0) * 100),
-                age: Math.round((backendData.bias_report?.protected_groups_impact?.age || 0) * 100),
-                education: Math.round((backendData.bias_report?.protected_groups_impact?.education || 0) * 100)
-            },
-            confidence: Math.round(backendData.score > 50 ? backendData.score : 100 - backendData.score),
-            explanation: backendData.explanation
-        };
-        
-        // Ensure signals has something if empty (for UI drivers)
-        if (Object.keys(finalData.signals).length === 0) {
-            finalData.signals = await callGemmaAPI(textData, type); // Fallback to mock signals for UI bars if backend doesn't provide them yet
-        }
+        const finalData = await fairAiBuildFinalDataFromBackend(backendData, detection, textData);
 
         setTimeout(() => {
+            if (typeof window.deductCredits === 'function') window.deductCredits(2);
             updateUI(finalData);
             btn.innerHTML = `<svg class="w-6 h-6 text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Run Analysis`;
             btn.disabled = false;
@@ -1211,6 +1298,46 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── DRAG & DROP & SMART FILE EXTRACTION ─────────────────────────
+async function fairAiBuildExtractedData(file) {
+    const fileType = file.name.split(".").pop().toLowerCase();
+    let extractedData = {
+        type: fileType.toUpperCase(),
+        title: file.name,
+        content: "",
+        sections: [],
+        tables: [],
+        summary: "",
+    };
+
+    if (fileType === "pdf") {
+        extractedData = await extractFromPDF(file);
+    } else if (fileType === "docx" || fileType === "doc") {
+        extractedData = await extractFromDOCX(file);
+    } else if (fileType === "png" || fileType === "jpg" || fileType === "jpeg") {
+        extractedData = await extractFromImage(file);
+    } else {
+        extractedData.content = await extractFromTXT(file);
+    }
+    return extractedData;
+}
+
+/**
+ * Extract readable text from PDF / Word / image (OCR) / plain text — same pipeline as desktop upload.
+ * @returns {Promise<{ ok: true, text: string } | { ok: false, error: string }>}
+ */
+async function fairAiExtractDocumentFile(file) {
+    if (!file) return { ok: false, error: "No file selected." };
+    try {
+        const extractedData = await fairAiBuildExtractedData(file);
+        return { ok: true, text: formatExtractedContent(extractedData) };
+    } catch (e) {
+        console.error("fairAiExtractDocumentFile:", e);
+        return { ok: false, error: e.message || "Unable to extract text from this document." };
+    }
+}
+
+window.fairAiExtractDocumentFile = fairAiExtractDocumentFile;
+
 async function handleFileUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -1223,28 +1350,8 @@ async function handleFileUpload(event) {
     candidateInput.disabled = true;
 
     try {
-        const fileType = file.name.split('.').pop().toLowerCase();
-        let extractedData = {
-            type: fileType.toUpperCase(),
-            title: file.name,
-            content: "",
-            sections: [],
-            tables: [],
-            summary: ""
-        };
-
-        if (fileType === 'pdf') {
-            extractedData = await extractFromPDF(file);
-        } else if (fileType === 'docx' || fileType === 'doc') {
-            extractedData = await extractFromDOCX(file);
-        } else if (fileType === 'png' || fileType === 'jpg' || fileType === 'jpeg') {
-            extractedData = await extractFromImage(file);
-        } else {
-            extractedData.content = await extractFromTXT(file);
-        }
-
-        const formattedText = formatExtractedContent(extractedData);
-        candidateInput.value = formattedText;
+        const extractedData = await fairAiBuildExtractedData(file);
+        candidateInput.value = formatExtractedContent(extractedData);
     } catch (e) {
         console.error("Extraction Error:", e);
         candidateInput.value = "Unable to extract text from this document. Please try another file.";
@@ -1256,7 +1363,10 @@ async function handleFileUpload(event) {
 
 async function extractFromPDF(file) {
     const arrayBuffer = await file.arrayBuffer();
-    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    const pdfjsLib = window["pdfjs-dist/build/pdf"] || window.pdfjsLib;
+    if (!pdfjsLib || typeof pdfjsLib.getDocument !== "function") {
+        throw new Error("PDF.js not loaded. Include pdf.js before script.js.");
+    }
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
     
     const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
@@ -1359,4 +1469,90 @@ document.addEventListener('DOMContentLoaded', () => {
         }, false);
     }
 });
+
+// ── Shared analysis pipeline (desktop + mobile Analysis tab) ─────────
+(function () {
+    function fairAiApiOrigin() {
+        if (typeof location === "undefined") return "";
+        const h = location.hostname;
+        const p = location.port || "";
+        if ((h === "127.0.0.1" || h === "localhost") && p && p !== "8000" && p !== "3000" && p !== "") {
+            return `http://${h === "localhost" ? "127.0.0.1" : h}:8000`;
+        }
+        return "";
+    }
+
+    function formatApiErr(body) {
+        if (!body || typeof body !== "object") return "Request failed";
+        if (typeof body.error === "string") return body.error;
+        if (body.detail == null) return "Request failed";
+        if (typeof body.detail === "string") return body.detail;
+        if (Array.isArray(body.detail)) {
+            return body.detail.map((x) => (x && typeof x === "object" && x.msg) ? x.msg : JSON.stringify(x)).join("; ");
+        }
+        return String(body.detail);
+    }
+
+    window.FairAiAnalysisCore = {
+        fairAiApiOrigin,
+
+        /**
+         * Same guardrails as runRealAnalysis: validateSelectedType → detectInputType → validateInput → POST /api/analyze.
+         * @param {string} textData - free-text profile (incl. pasted resume)
+         * @param {string} selectedType - "hiring" | "loan" | "admission" (matches mobile domain dropdown)
+         */
+        async runAnalysis(textData, selectedType) {
+            const raw = (textData || "").trim();
+            if (raw.length < 20) {
+                return { ok: false, message: "Input too short." };
+            }
+
+            const typeCheck = validateSelectedType(raw, selectedType);
+            if (!typeCheck.success) {
+                return {
+                    ok: false,
+                    errorType: typeCheck.errorType || "TYPE_MISMATCH",
+                    message: typeCheck.message || "Selected domain does not match the text.",
+                    detectedType: typeCheck.detectedType,
+                };
+            }
+
+            const detection = detectInputType(raw);
+            if (!detection || !detection.type) {
+                return { ok: false, message: "Unable to determine input type. Please provide clearer details." };
+            }
+
+            const validation = validateInput(raw, detection.type);
+            if (!validation.valid) {
+                return { ok: false, message: validation.message || "Input is incomplete for this domain." };
+            }
+
+            const origin = fairAiApiOrigin();
+            const response = await fetch(origin + "/api/analyze", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model_type: detection.type,
+                    features: { profile_text: raw },
+                }),
+            });
+
+            let body;
+            try {
+                body = await response.json();
+            } catch (e) {
+                body = {};
+            }
+
+            if (!response.ok) {
+                return { ok: false, message: formatApiErr(body) || `API Error: ${response.status}` };
+            }
+            if (body.success === false) {
+                return { ok: false, message: formatApiErr(body) || "Analysis failed" };
+            }
+
+            return { ok: true, detection, backendData: body };
+        },
+    };
+})();
 

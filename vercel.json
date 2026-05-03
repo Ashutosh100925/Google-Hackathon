@@ -1,23 +1,19 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "main.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "index.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "!(api/**|main.py|requirements.txt|vercel.json)",
-      "use": "@vercel/static"
-    }
-  ],
+  "framework": "fastapi",
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/main.py"
+      "destination": "api/index.py"
+    },
+    {
+      "source": "/firebase-config-js",
+      "destination": "api/index.py"
+    },
+    {
+      "source": "/health",
+      "destination": "api/index.py"
     }
-  ]
+  ],
+  "cleanUrls": true
 }

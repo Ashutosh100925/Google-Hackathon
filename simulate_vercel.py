@@ -15,6 +15,7 @@ try:
             "type": "http",
             "method": "GET",
             "path": "/api/health",
+            "query_string": b"",
             "headers": []
         }
         async def receive(): return {"type": "http.request"}

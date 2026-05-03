@@ -1,8 +1,9 @@
 import os
 import sys
-from fastapi import FastAPI
+from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
 # Load environment variables from .env file if it exists
@@ -21,10 +22,12 @@ sys.path.insert(0, root_dir)
 # Import routers from the consolidated backend_src
 try:
     from routers import health, analyze
+    from routers.analyze import execute_document_analysis
 except ImportError:
     # If standard import fails, try relative to backend_dir
     sys.path.append(backend_dir)
     from routers import health, analyze
+    from routers.analyze import execute_document_analysis
 
 # Explicit FastAPI instance for Vercel detection
 app = FastAPI(
@@ -57,6 +60,18 @@ async def analyze_get_info():
 async def analyze_data_direct(request: analyze.AnalysisRequestPayload):
     try:
         return run_prediction(request.model_type, request.features)
+    except Exception as e:
+        import traceback
+        return JSONResponse(status_code=500, content={"success": False, "error": str(e), "detail": traceback.format_exc()})
+
+
+@api_router.post("/analyze/document")
+@api_router.post("/analyze/document/")
+async def analyze_document_direct(model_type: str = Form(...), file: UploadFile = File(...)):
+    try:
+        return await execute_document_analysis(model_type, file)
+    except ValueError as e:
+        return JSONResponse(status_code=400, content={"success": False, "error": str(e)})
     except Exception as e:
         import traceback
         return JSONResponse(status_code=500, content={"success": False, "error": str(e), "detail": traceback.format_exc()})
@@ -107,9 +122,16 @@ async def get_firebase_config_js():
 app.include_router(api_router, prefix="/api")
 app.include_router(api_router)
 
-@app.get("/{path:path}")
-def catch_all(path: str):
-    return JSONResponse(status_code=404, content={"success": False, "error": f"Path not found: /{path}"})
+mobile_dir = os.path.join(root_dir, "mobile")
+if os.path.isdir(mobile_dir):
+    app.mount("/mobile", StaticFiles(directory=mobile_dir, html=True), name="mobile")
+
+game_dir = os.path.join(root_dir, "Game")
+if os.path.isdir(game_dir):
+    app.mount("/Game", StaticFiles(directory=game_dir, html=True), name="game")
+
+# SPA + mini-game + shared assets (index.html, script.js, auth.js, Cards/, etc.)
+app.mount("/", StaticFiles(directory=root_dir, html=True), name="static")
 
 from fastapi.responses import JSONResponse
 

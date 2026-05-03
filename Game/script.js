@@ -1478,7 +1478,19 @@ let progress = {
   completed: [],
 };
 
-init();
+function getActivePack() {
+  return PACKS[activePackIndex];
+}
+
+function getActiveLevels() {
+  return getActivePack().levels;
+}
+
+function getProgressStorageKey() {
+  return `${STORAGE_KEY_PREFIX}-${getActivePack().id}`;
+}
+
+
 
 function init() {
   loadProgress();
@@ -1517,48 +1529,73 @@ function setupLevel(levelIndex) {
   levelValueEl.textContent = String(levelIndex + 1);
   moveValueEl.textContent = "0";
   progressTextEl.textContent = "Fill every cell to win";
-  renderGrid();
+  buildGridDom();
   renderLevelsCarousel();
 }
 
-function renderGrid() {
+/** Stable button nodes per cell — rebuilt only when the level changes. */
+let cellDom = [];
+
+function buildGridDom() {
   gridEl.innerHTML = "";
+  cellDom = [];
   for (let row = 0; row < currentGridSize; row += 1) {
+    cellDom[row] = [];
     for (let col = 0; col < currentGridSize; col += 1) {
       const cell = document.createElement("button");
-      const cellData = board[row][col];
       cell.type = "button";
       cell.className = "cell";
       cell.dataset.row = String(row);
       cell.dataset.col = String(col);
       cell.setAttribute("aria-label", `Cell ${row + 1}, ${col + 1}`);
+      gridEl.appendChild(cell);
+      cellDom[row][col] = cell;
+    }
+  }
+  syncGridDom();
+}
+
+function syncGridDom() {
+  for (let row = 0; row < currentGridSize; row += 1) {
+    for (let col = 0; col < currentGridSize; col += 1) {
+      const el = cellDom[row][col];
+      if (!el) continue;
+      const cellData = board[row][col];
+
+      el.classList.toggle("endpoint", !!cellData.endpointColor);
+      el.classList.toggle("path", !!cellData.pathColor);
+      el.classList.toggle("connected", isConnectedEndpoint(row, col));
 
       const drawColorKey = cellData.pathColor || cellData.endpointColor;
       if (drawColorKey) {
-        const drawColor = COLOR_MAP[drawColorKey];
-        cell.style.setProperty("--color", drawColor);
-      }
-
-      if (cellData.endpointColor) {
-        cell.classList.add("endpoint");
+        el.style.setProperty("--color", COLOR_MAP[drawColorKey]);
+      } else {
+        el.style.removeProperty("--color");
       }
 
       if (cellData.pathColor) {
-        cell.classList.add("path");
-        cell.style.background = `color-mix(in srgb, ${COLOR_MAP[cellData.pathColor]} 28%, rgba(8, 14, 34, 0.88))`;
-        cell.style.boxShadow = `0 0 16px color-mix(in srgb, ${COLOR_MAP[cellData.pathColor]} 42%, transparent), inset 0 0 0 1px rgba(255,255,255,0.12)`;
+        el.style.background = `color-mix(in srgb, ${COLOR_MAP[cellData.pathColor]} 28%, rgba(8, 14, 34, 0.88))`;
+        el.style.boxShadow = `0 0 16px color-mix(in srgb, ${COLOR_MAP[cellData.pathColor]} 42%, transparent), inset 0 0 0 1px rgba(255,255,255,0.12)`;
+      } else {
+        el.style.removeProperty("background");
+        el.style.removeProperty("box-shadow");
       }
-
-      if (isConnectedEndpoint(row, col)) {
-        cell.classList.add("connected");
-      }
-
-      gridEl.appendChild(cell);
     }
   }
 }
 
 function wireEvents() {
+  const getCellAtPoint = (clientX, clientY) => {
+    let el = document.elementFromPoint(clientX, clientY);
+    while (el && el !== gridEl) {
+      if (el.classList && el.classList.contains("cell")) {
+        return el;
+      }
+      el = el.parentElement;
+    }
+    return null;
+  };
+
   const startDraw = (element) => {
     if (!element || !element.classList.contains("cell")) {
       return;
@@ -1575,7 +1612,7 @@ function wireEvents() {
     activePath = [{ row, col }];
     clearPathColor(activeColor);
     paintPath(activeColor, activePath);
-    renderGrid();
+    syncGridDom();
   };
 
   const continueDraw = (element) => {
@@ -1604,17 +1641,19 @@ function wireEvents() {
   };
 
   gridEl.addEventListener("pointerdown", (event) => {
-    startDraw(event.target);
-    if (dragging) {
-      event.target.setPointerCapture(event.pointerId);
+    event.preventDefault();
+    if (event.target.hasPointerCapture && event.target.hasPointerCapture(event.pointerId)) {
+      event.target.releasePointerCapture(event.pointerId);
     }
+    startDraw(event.target);
   });
 
   gridEl.addEventListener("pointermove", (event) => {
     if (!dragging) {
       return;
     }
-    const target = document.elementFromPoint(event.clientX, event.clientY);
+    event.preventDefault();
+    const target = getCellAtPoint(event.clientX, event.clientY);
     continueDraw(target);
   });
 
@@ -1623,6 +1662,7 @@ function wireEvents() {
   gridEl.addEventListener("pointerleave", () => {
     justStarted = false;
   });
+  window.addEventListener("pointerup", stopDraw);
 
   resetBtn.addEventListener("click", () => setupLevel(currentLevel));
   levelsBtn.addEventListener("click", openLevelsModal);
@@ -1679,7 +1719,7 @@ function tryExtendPath(row, col) {
     activePath = activePath.slice(0, existingIndex + 1);
     repaintBoardFromAllPaths();
     paintPath(activeColor, activePath);
-    renderGrid();
+    syncGridDom();
     return;
   }
 
@@ -1700,7 +1740,7 @@ function tryExtendPath(row, col) {
   activePath.push({ row, col });
   repaintBoardFromAllPaths();
   paintPath(activeColor, activePath);
-  renderGrid();
+  syncGridDom();
 }
 
 function clearPathColor(color) {
@@ -2141,3 +2181,5 @@ const TutorialManager = {
     await this.delay(600);
   }
 };
+TutorialManager.init();
+init();

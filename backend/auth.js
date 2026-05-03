@@ -1,5 +1,24 @@
 import { firebaseInitPromise } from "./firebase.js";
 
+if (typeof window.hideSignInModal !== "function") {
+    window.hideSignInModal = function () {};
+}
+if (typeof window.showSignInModal !== "function") {
+    window.showSignInModal = function () {
+        const loginView = document.getElementById("login-view");
+        if (loginView) {
+            document.querySelectorAll(".view").forEach((v) => {
+                v.classList.add("hidden");
+            });
+            loginView.classList.remove("hidden");
+            const bottomNav = document.querySelector(".bottom-nav");
+            if (bottomNav) bottomNav.classList.add("hidden");
+            return;
+        }
+        alert("Please sign in with Google from the login screen.");
+    };
+}
+
 let auth = null;
 let provider = null;
 let config = null;
@@ -72,18 +91,27 @@ window.deductCredits = (amount) => {
     return false;
 };
 
-function updateCreditsUI() {
-    const creditsDisplay = document.getElementById('ai-credits-display');
-    if (creditsDisplay) {
-        creditsDisplay.textContent = UNLIMITED_CREDITS_MODE
-            ? `${UNLIMITED_CREDITS_LABEL} AI credits`
-            : `${window.getUserCredits()} AI credits`;
-    }
+window.updateCreditsUI = function() {
+    const label = (typeof UNLIMITED_CREDITS_MODE !== 'undefined' && UNLIMITED_CREDITS_MODE)
+        ? `${UNLIMITED_CREDITS_LABEL} AI credits`
+        : `${window.getUserCredits()} AI credits`;
+
+    document.querySelectorAll(".ai-credits-display").forEach((el) => {
+        el.textContent = label;
+    });
+    
+    document.querySelectorAll("[data-fairai-user-credits]").forEach((el) => {
+        el.textContent = label;
+    });
 }
 
+window.checkCredits = (amount = 2) => {
+    return window.getUserCredits() >= amount;
+};
+
 window.executeWithCredits = (callback, amount = 2) => {
-    if (window.getUserCredits() >= amount) {
-        window.deductCredits(amount);
+    if (window.checkCredits(amount)) {
+        // Callback will handle deduction upon success
         callback();
     } else {
         const modal = document.getElementById('low-credits-modal');
@@ -101,10 +129,18 @@ window.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'LEVEL_COMPLETED') {
         window.addCredits(5);
 
-        // Show temporary earning notification
         const toast = document.createElement('div');
-        toast.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-[#34D399] text-[#064E3B] px-6 py-3 rounded-full font-bold shadow-xl z-[99999] transition-opacity duration-300 pointer-events-none border border-[#059669]/20 flex items-center gap-2';
-        toast.innerHTML = `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> +5 AI Credits Earned!`;
+        const isMobileShell = !!document.getElementById('login-view');
+        if (isMobileShell) {
+            toast.style.cssText =
+                'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:2147483646;' +
+                'background:#34D399;color:#064E3B;padding:12px 20px;border-radius:999px;font-weight:700;' +
+                'font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,0.35);pointer-events:none;' +
+                'display:flex;align-items:center;gap:8px;transition:opacity 0.3s;max-width:92vw;';
+        } else {
+            toast.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-[#34D399] text-[#064E3B] px-6 py-3 rounded-full font-bold shadow-xl z-[99999] transition-opacity duration-300 pointer-events-none border border-[#059669]/20 flex items-center gap-2';
+        }
+        toast.innerHTML = `<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> +5 AI Credits Earned!`;
         document.body.appendChild(toast);
         setTimeout(() => {
             toast.style.opacity = '0';
@@ -124,6 +160,7 @@ firebaseInitPromise.then((fb) => {
             currentUser = user;
             if (user) ensureInitialCredits();
             updateAuthUI(user);
+            updateMobileFairAiAuth(user);
 
             if (user && pendingCallback) {
                 const callback = pendingCallback;
@@ -182,7 +219,7 @@ function updateAuthUI(user) {
                             <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M12 3L14.5 9L21 10L16 14.5L17.5 21L12 18L6.5 21L8 14.5L3 10L9.5 9L12 3Z" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
-                            <span id="ai-credits-display" class="text-white font-medium underline underline-offset-4 decoration-white/60">${UNLIMITED_CREDITS_MODE ? `${UNLIMITED_CREDITS_LABEL} AI credits` : `${window.getUserCredits()} AI credits`}</span>
+                            <span id="ai-credits-display" class="ai-credits-display text-white font-medium underline underline-offset-4 decoration-white/60">${UNLIMITED_CREDITS_MODE ? `${UNLIMITED_CREDITS_LABEL} AI credits` : `${window.getUserCredits()} AI credits`}</span>
                         </div>
                         <p class="text-[13px] text-gray-400">Credits refresh daily</p>
                     </div>
@@ -242,6 +279,94 @@ function updateAuthUI(user) {
         }
         const mobileProfile = document.querySelector('.mobile-user-profile');
         if (mobileProfile) mobileProfile.remove();
+    }
+}
+
+function buildMobileAuthProfileHtml(user) {
+    return "";
+}
+
+function updateMobileFairAiAuth(user) {
+    const loginView = document.getElementById("login-view");
+    if (!loginView) return;
+
+    const onboardingView = document.getElementById("onboarding-view");
+    const dashboardView = document.getElementById("dashboard-view");
+    const analysisFlowView = document.getElementById("analysis-view");
+    const bottomNav = document.querySelector(".bottom-nav");
+    const mobileRoot = document.getElementById("mobile-auth-profile-root");
+    const analysisCreditsRoot = document.getElementById("mobile-analysis-auth-chips-root");
+    const welcomeName = document.getElementById("mobile-welcome-name");
+
+    if (user) {
+        loginView.classList.add("hidden");
+        const onboarded = localStorage.getItem("fairai_mobile_onboarded") === "1";
+        if (!onboarded && onboardingView) {
+            onboardingView.classList.remove("hidden");
+            if (dashboardView) dashboardView.classList.add("hidden");
+            if (analysisFlowView) analysisFlowView.classList.add("hidden");
+            if (bottomNav) bottomNav.classList.add("hidden");
+            [
+                "tab-analysis-view",
+                "tab-history-view",
+                "tab-result-view",
+                "tab-report-view",
+                "profile-view",
+            ].forEach((id) => document.getElementById(id)?.classList.add("hidden"));
+        } else {
+            if (onboardingView) onboardingView.classList.add("hidden");
+            if (analysisFlowView) analysisFlowView.classList.add("hidden");
+            [
+                "tab-analysis-view",
+                "tab-history-view",
+                "tab-result-view",
+                "tab-report-view",
+                "profile-view",
+            ].forEach((id) => document.getElementById(id)?.classList.add("hidden"));
+            document.querySelectorAll(".bottom-nav .nav-item").forEach((n) => n.classList.remove("active"));
+            document.querySelector(".bottom-nav .tab-home")?.classList.add("active");
+            if (dashboardView) {
+                dashboardView.classList.remove("hidden");
+                if (bottomNav) bottomNav.classList.remove("hidden");
+            }
+        }
+
+        document.querySelectorAll("[data-fairai-user-photo]").forEach((img) => {
+            img.src = user.photoURL || "https://via.placeholder.com/100";
+            img.alt = user.displayName || "Account";
+        });
+        document.querySelectorAll("[data-fairai-user-name]").forEach((el) => {
+            el.textContent = user.displayName || "Account";
+        });
+        window.updateCreditsUI();
+        if (welcomeName) {
+            const first = (user.displayName || "there").split(/\s+/)[0];
+            welcomeName.textContent = first;
+        }
+        if (mobileRoot) {
+            mobileRoot.classList.add("hidden");
+            mobileRoot.innerHTML = "";
+        }
+        if (analysisCreditsRoot) {
+            analysisCreditsRoot.classList.add("hidden");
+            analysisCreditsRoot.innerHTML = "";
+        }
+        updateCreditsUI();
+    } else {
+        loginView.classList.remove("hidden");
+        document.querySelectorAll(".view").forEach((v) => {
+            if (v.id !== "login-view") v.classList.add("hidden");
+        });
+        if (bottomNav) bottomNav.classList.add("hidden");
+        if (mobileRoot) {
+            mobileRoot.innerHTML = "";
+            mobileRoot.classList.add("hidden");
+        }
+        if (analysisCreditsRoot) {
+            analysisCreditsRoot.innerHTML = "";
+            analysisCreditsRoot.classList.add("hidden");
+        }
+        if (welcomeName) welcomeName.textContent = "there";
     }
 }
 
@@ -320,5 +445,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.showSignInModal();
             };
         }
+    });
+
+    const mobLoginForm = document.querySelector("#login-view .login-form");
+    if (mobLoginForm) {
+        mobLoginForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            window.handleGoogleSignIn();
+        });
+    }
+    document.getElementById("google-signin-btn")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        window.handleGoogleSignIn();
     });
 });
