@@ -16,6 +16,10 @@ async function initFirebase() {
     try {
         const response = await fetch(apiBase + "/api/firebase-config");
         config = await response.json();
+        // If the backend returns null for apiKey, it means environment variables aren't set in Vercel
+        if (!config.apiKey) {
+            config.apiKey = "MISSING_API_KEY";
+        }
     } catch (error) {
         console.warn("Failed to fetch config from backend, using fallback");
         config = {
